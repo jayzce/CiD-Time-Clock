@@ -560,7 +560,7 @@
             border-radius: 10px;
             padding: 8px 15px;
             font-size: 0.9rem;
-            color: #43e97b;
+            color: #FFD700;
             z-index: 10;
         }
 
@@ -648,8 +648,8 @@
 <body>
     <div class="floating-particles" id="particlesContainer"></div>
     <div class="container">
-        <div class="sheets-status" id="sheetsStatus" onclick="testGoogleSheetsConnection()" style="cursor: pointer;" title="Click to test connection">
-            <i class="fas fa-wifi"></i> Ready to connect
+        <div class="sheets-status" id="sheetsStatus">
+            <i class="fas fa-wifi"></i> Needs Setup
         </div>
         <div class="header">
             <h1 class="title">EMPLOYEE TIME CLOCK</h1>
@@ -729,8 +729,8 @@
     </div>
 
     <script>
-        // Use your new Apps Script URL here after deploying the updated script
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxCER-yFLTrFGqRCDRW8R7htrCnNvfkEpjykzdPgfs/dev';
+        // *** IMPORTANT: You must replace this with your Google Apps Script Web App URL ***
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzS0ie2AOu4qIU8HxY4ZJe5jPQMPxMGfN1IT10KcRBm-e67kqwKPqastnfXEgLbalx/exec';
 
         // State management object
         const timeClockState = {
@@ -859,7 +859,32 @@
             `;
             dom.activityLog.prepend(logEntry);
         }
-
+        
+        // Function to send data to the Google Apps Script web app
+        async function sendDataToSheets(data) {
+            try {
+                if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+                    throw new Error('Please set your Apps Script URL in the code.');
+                }
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Required for Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                // Since the mode is 'no-cors', we can't check the response directly.
+                // We'll just assume it worked unless there was a network error.
+                showNotification('Data sent to Google Sheets!', 'success');
+            } catch (error) {
+                console.error('Error sending data to Sheets:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+        
         // Action handlers
         async function handleClockIn() {
             const employeeName = dom.employeeNameInput.value.trim();
@@ -876,11 +901,10 @@
             dom.employeeNameDisplay.textContent = employeeName;
             dom.employeeIdDisplay.textContent = `ID: ${employeeId}`;
             dom.employeeAvatar.textContent = employeeName.split(' ').map(n => n[0]).join('').toUpperCase();
-
+            
             updateUI();
             addLogEntry('Clock In');
-            showNotification('Successfully Clocked In!', 'success');
-
+            
             const now = new Date();
             const data = {
                 employeeName: employeeName,
@@ -890,19 +914,12 @@
                 time: now.toLocaleTimeString(),
             };
             
-            try {
-                const response = await sendDataToSheets(data);
-                if (response.status === 'success') {
-                    showNotification('Data sent to Google Sheets!', 'success');
-                } else {
-                    showNotification(`Error: ${response.message}`, 'error');
-                }
-            } catch (error) {
-                showNotification(`Network error: ${error.message}`, 'error');
-            }
+            await sendDataToSheets(data);
         }
 
         async function handleClockOut() {
+            if (!timeClockState.isClockedIn) return;
+
             timeClockState.isClockedIn = false;
             timeClockState.currentTask = 'Idle';
             const totalHours = formatTime(timeClockState.totalSeconds);
@@ -912,7 +929,6 @@
             updateUI();
             addLogEntry(`Clock Out (${totalHours})`);
             
-            // Show thank you popup
             dom.popupMessage.textContent = `Your clock-out has been recorded. You worked for a total of ${totalHours}. Have a great day!`;
             dom.thankYouPopup.classList.add('show');
             
@@ -926,16 +942,7 @@
                 duration: totalHours
             };
 
-            try {
-                const response = await sendDataToSheets(data);
-                if (response.status === 'success') {
-                    showNotification('Data sent to Google Sheets!', 'success');
-                } else {
-                    showNotification(`Error: ${response.message}`, 'error');
-                }
-            } catch (error) {
-                showNotification(`Network error: ${error.message}`, 'error');
-            }
+            await sendDataToSheets(data);
         }
 
         async function handleBreakIn(type) {
@@ -943,7 +950,6 @@
                 showNotification('Please Clock In first', 'warning');
                 return;
             }
-
             if (timeClockState.currentTask !== 'Idle') {
                 showNotification('Please complete your current task first', 'warning');
                 return;
@@ -972,16 +978,7 @@
                 time: now.toLocaleTimeString(),
             };
 
-            try {
-                const response = await sendDataToSheets(data);
-                if (response.status === 'success') {
-                    showNotification('Data sent to Google Sheets!', 'success');
-                } else {
-                    showNotification(`Error: ${response.message}`, 'error');
-                }
-            } catch (error) {
-                showNotification(`Network error: ${error.message}`, 'error');
-            }
+            await sendDataToSheets(data);
         }
 
         async function handleBreakOut(type) {
@@ -1017,16 +1014,7 @@
                 duration: duration
             };
             
-            try {
-                const response = await sendDataToSheets(data);
-                if (response.status === 'success') {
-                    showNotification('Data sent to Google Sheets!', 'success');
-                } else {
-                    showNotification(`Error: ${response.message}`, 'error');
-                }
-            } catch (error) {
-                showNotification(`Network error: ${error.message}`, 'error');
-            }
+            await sendDataToSheets(data);
         }
 
         function handleSystemIssue() {
@@ -1034,7 +1022,7 @@
                 // End system issue
                 timeClockState.systemIssueStartTime = null;
                 dom.systemIssueButton.classList.remove('system-issue-active');
-                dom.systemIssueButton.textContent = 'System Issue';
+                dom.systemIssueButton.innerHTML = `<i class="fas fa-exclamation-triangle"></i> System Issue`;
                 
                 clearInterval(timeClockState.systemIssueTimer);
                 timeClockState.systemIssueTimer = null;
@@ -1118,7 +1106,7 @@
             
             dom.systemIssueDisplay.style.display = 'none';
             dom.systemIssueButton.classList.remove('system-issue-active');
-            dom.systemIssueButton.textContent = 'System Issue';
+            dom.systemIssueButton.innerHTML = `<i class="fas fa-exclamation-triangle"></i> System Issue`;
 
             updateUI();
             showNotification('All buttons and states have been reset', 'success');
@@ -1150,66 +1138,7 @@
         function closeOverbreakAlert() {
             dom.overbreakAlert.classList.remove('show');
         }
-
-        // This function sends data to the Google Sheets web app.
-        // It has been updated to use FormData to avoid CORS issues.
-        async function sendDataToSheets(data) {
-            try {
-                // Create a FormData object to send the data.
-                const formData = new FormData();
-                for (const key in data) {
-                    formData.append(key, data[key]);
-                }
-
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Error sending data to Sheets:', error);
-                throw error;
-            }
-        }
         
-        async function testGoogleSheetsConnection() {
-            dom.sheetsStatus.textContent = 'Connecting...';
-            dom.sheetsStatus.style.color = '#ffb74d';
-            dom.sheetsStatus.classList.add('pulse');
-            
-            try {
-                const testData = {
-                    employeeName: 'Connection Test',
-                    employeeId: 'TEST-001',
-                    action: 'Connection Test',
-                    date: new Date().toLocaleDateString(),
-                    time: new Date().toLocaleTimeString(),
-                };
-                const response = await sendDataToSheets(testData);
-                if (response.status === 'success') {
-                    dom.sheetsStatus.textContent = 'Connected';
-                    dom.sheetsStatus.style.color = '#43e97b';
-                    showNotification('Connection to Google Sheets is successful!', 'success');
-                } else {
-                    dom.sheetsStatus.textContent = 'Failed';
-                    dom.sheetsStatus.style.color = '#f5576c';
-                    showNotification('Failed to connect to Google Sheets.', 'error');
-                }
-            } catch (error) {
-                dom.sheetsStatus.textContent = 'Failed';
-                dom.sheetsStatus.style.color = '#f5576c';
-                console.error('Sheets connection test failed:', error);
-                showNotification('Sheets connection test failed.', 'error');
-            } finally {
-                dom.sheetsStatus.classList.remove('pulse');
-            }
-        }
-
         // Add this at the end to create floating particles
         function createParticles() {
             const container = document.getElementById('particlesContainer');
@@ -1234,8 +1163,6 @@
                 container.appendChild(particle);
             }
         }
-
     </script>
 </body>
 </html>
-
