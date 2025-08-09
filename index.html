@@ -647,17 +647,14 @@
 </head>
 <body>
     <div class="floating-particles" id="particlesContainer"></div>
-    
     <div class="container">
         <div class="sheets-status" id="sheetsStatus" onclick="testGoogleSheetsConnection()" style="cursor: pointer;" title="Click to test connection">
             <i class="fas fa-wifi"></i> Ready to connect
         </div>
-        
         <div class="header">
             <h1 class="title">EMPLOYEE TIME CLOCK</h1>
             <div class="current-time" id="currentTime"></div>
         </div>
-
         <div class="employee-info">
             <div class="avatar" id="employeeAvatar">JD</div>
             <div class="employee-details">
@@ -665,493 +662,579 @@
                 <div class="employee-id" id="employeeId">ID: EMP-001</div>
             </div>
         </div>
-
         <div class="employee-section">
             <input type="text" class="employee-input" id="employeeName" placeholder="Enter Employee Name or ID">
-            
             <div class="state-indicators">
                 <div class="state-indicator">
                     <div class="state-label">Clock Status</div>
-                    <div class="state-value state-inactive" id="clockState">Not Clocked In</div>
+                    <div class="state-value" id="clockStatus">Offline</div>
                 </div>
                 <div class="state-indicator">
-                    <div class="state-label">Break Status</div>
-                    <div class="state-value state-inactive" id="breakState">Not Started</div>
+                    <div class="state-label">Total Hours</div>
+                    <div class="state-value" id="totalHours">00:00:00</div>
                 </div>
                 <div class="state-indicator">
-                    <div class="state-label">Lunch Status</div>
-                    <div class="state-value state-inactive" id="lunchState">Not Started</div>
+                    <div class="state-label">Current Task</div>
+                    <div class="state-value" id="currentTask">Idle</div>
                 </div>
                 <div class="state-indicator">
-                    <div class="state-label">System Issue</div>
-                    <div class="state-value state-inactive" id="systemState">Not Started</div>
+                    <div class="state-label">Break Time</div>
+                    <div class="state-value" id="breakTimerDisplay">00:00:00</div>
                 </div>
             </div>
-
-            <!-- Break Timers Display -->
-            <div class="break-timers">
-                <div class="break-timer" id="currentBreakTimer">
-                    <div class="break-timer-label">Current Break</div>
-                    <div class="break-timer-value" id="currentBreakTime">00:00</div>
-                </div>
-                <div class="break-timer" id="currentLunchTimer">
-                    <div class="break-timer-label">Current Lunch</div>
-                    <div class="break-timer-value" id="currentLunchTime">00:00</div>
-                </div>
-                <div class="break-timer" id="totalBreaksTimer">
-                    <div class="break-timer-label">Total Breaks Used</div>
-                    <div class="break-timer-value" id="totalBreaksTime">0 / 2</div>
-                </div>
-                <div class="break-timer" id="totalLunchTimer">
-                    <div class="break-timer-label">Lunch Completed</div>
-                    <div class="break-timer-value" id="totalLunchTime">No</div>
-                </div>
-            </div>
-
             <div class="button-grid">
-                <button class="clock-button clock-in" onclick="clockAction('Clock In', this)" id="clockInBtn">
-                    <i class="fas fa-sign-in-alt"></i> Clock In
-                </button>
-                <button class="clock-button system-issue" onclick="toggleSystemIssue()" id="systemIssueBtn" disabled>
-                    <i class="fas fa-exclamation-triangle"></i> System Issue
-                </button>
-                <button class="clock-button clock-out" onclick="clockAction('Clock Out', this)" id="clockOutBtn" disabled>
-                    <i class="fas fa-sign-out-alt"></i> Clock Out
-                </button>
-                <button class="clock-button break-in" onclick="clockAction('Break Start', this)" id="breakInBtn" disabled>
-                    <i class="fas fa-coffee"></i> Break Start
-                </button>
-                <button class="clock-button break-out" onclick="clockAction('Break End', this)" id="breakOutBtn" disabled>
-                    <i class="fas fa-coffee"></i> Break End
-                </button>
-                <button class="clock-button lunch-in" onclick="clockAction('Lunch Start', this)" id="lunchInBtn" disabled>
-                    <i class="fas fa-utensils"></i> Lunch Start
-                </button>
-                <button class="clock-button lunch-out" onclick="clockAction('Lunch End', this)" id="lunchOutBtn" disabled>
-                    <i class="fas fa-utensils"></i> Lunch End
-                </button>
-                <button class="clock-button bio-in" onclick="clockAction('Bio Break Start', this)" id="bioInBtn" disabled>
-                    <i class="fas fa-restroom"></i> Bio Break Start
-                </button>
-                <button class="clock-button bio-out" onclick="clockAction('Bio Break End', this)" id="bioOutBtn" disabled>
-                    <i class="fas fa-restroom"></i> Bio Break End
-                </button>
+                <button class="clock-button clock-in" id="clockInButton"><i class="fas fa-sign-in-alt"></i> Clock In</button>
+                <button class="clock-button clock-out" id="clockOutButton" disabled><i class="fas fa-sign-out-alt"></i> Clock Out</button>
+                <button class="clock-button break-in" id="breakInButton" disabled><i class="fas fa-coffee"></i> Break In</button>
+                <button class="clock-button break-out" id="breakOutButton" disabled><i class="fas fa-mug-hot"></i> Break Out</button>
+                <button class="clock-button lunch-in" id="lunchInButton" disabled><i class="fas fa-utensils"></i> Lunch In</button>
+                <button class="clock-button lunch-out" id="lunchOutButton" disabled><i class="fas fa-check"></i> Lunch Out</button>
+                <button class="clock-button bio-in" id="bioInButton" disabled><i class="fas fa-hand-holding-water"></i> Bio Break In</button>
+                <button class="clock-button bio-out" id="bioOutButton" disabled><i class="fas fa-hands-wash"></i> Bio Break Out</button>
+                <button class="clock-button system-issue" id="systemIssueButton"><i class="fas fa-exclamation-triangle"></i> System Issue</button>
             </div>
-
             <div class="system-issue-display" id="systemIssueDisplay">
-                <div class="system-issue-title">Current System Issue</div>
-                <div class="system-issue-time" id="systemIssueStartTime">Not started</div>
-                <div class="system-duration" id="systemIssueDuration">Duration: 00:00:00</div>
+                <div class="system-issue-title">System Issue Active</div>
+                <div class="system-issue-time" id="systemIssueStartTime"></div>
+                <div class="system-duration" id="systemIssueDuration">00:00:00</div>
             </div>
-
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="reset-button" onclick="resetButtons()">
-                    <i class="fas fa-sync-alt"></i> RESET ALL
-                </button>
+            <div class="activity-log" id="activityLog">
+                <h3>Activity Log</h3>
             </div>
-        </div>
-
-        <div class="activity-log">
-            <h3>Today's Activity Log</h3>
-            <div id="logEntries"></div>
+            <button class="reset-button" id="resetButton"><i class="fas fa-redo"></i> Reset All</button>
         </div>
     </div>
-
-    <!-- Thank You Popup -->
+    <div class="notification" id="notification"></div>
     <div class="popup-overlay" id="thankYouPopup">
         <div class="popup-content">
-            <div class="popup-title">Thank You!</div>
-            <div class="popup-message">
-                Thank you for your hard work and for coming in today. We appreciate you!
-            </div>
-            <button class="popup-close" onclick="closeThankYouPopup()">
-                <i class="fas fa-check"></i> CONTINUE
-            </button>
+            <h2 class="popup-title">Thank You!</h2>
+            <p class="popup-message" id="popupMessage">Your clock-out has been recorded. Have a great day!</p>
+            <button class="popup-close" onclick="closeThankYouPopup()">Close</button>
         </div>
     </div>
-
-    <!-- Overbreak Alert Popup -->
     <div class="overbreak-alert" id="overbreakAlert">
-        <div class="overbreak-title">⚠️ OVERBREAK ALERT ⚠️</div>
-        <div class="overbreak-message" id="overbreakMessage">You have exceeded your allotted break time!</div>
-        <div class="overbreak-time" id="overbreakTime">Current time: 00:00</div>
-        <button class="popup-close" onclick="closeOverbreakAlert()" style="background: rgba(255,255,255,0.3);">
-            <i class="fas fa-check"></i> ACKNOWLEDGE
-        </button>
+        <div class="overbreak-title">OVERBREAK ALERT!</div>
+        <p class="overbreak-message">You have exceeded your allotted break time. Please clock out of your break immediately.</p>
+        <div class="break-timers">
+            <div class="break-timer">
+                <div class="break-timer-label">Break Started</div>
+                <div class="break-timer-value" id="breakStartTimeAlert"></div>
+            </div>
+            <div class="break-timer overbreak">
+                <div class="break-timer-label">Overbreak Duration</div>
+                <div class="break-timer-value" id="overbreakDurationAlert"></div>
+            </div>
+        </div>
+        <button class="popup-close" onclick="closeOverbreakAlert()">I Understand</button>
     </div>
 
-<script>
-// Employee Database
-const EMPLOYEE_DATABASE = {
-    "maria theresa stephanie bamba": "2023-0020",
-    "gina silvano": "2023-0021",
-    "letty malasarte": "2023-0023",
-    "luigi miguel ignacio": "2023-0031",
-    "john kevin de leon": "2024-0222"
-    // Add more employees as needed
-};
+    <script>
+        // Use your new Apps Script URL here after deploying the updated script
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXDTiPb_fVh1Ki2_HzedAtnjPoDH_-B7McdoQC93AQlyifIjtbqjGFN0e6sjEx0n5G/exec';
 
-// Configuration for Google Apps Script
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXDTiPb_fVh1Ki2_HzedAtnjPoDH_-B7McdoQC93AQlyifIjtbqjGFN0e6sjEx0n5G/exec';
-
-// Break time limits
-const BREAK_LIMIT = 15;
-const LUNCH_LIMIT = 60;
-const MAX_BREAKS = 2;
-
-// State management
-const timeClockState = {
-    clockedIn: false,
-    clockInTime: null,
-    breakStarted: false,
-    breakCompleted: false,
-    breakStartTime: null,
-    breakCount: 0,
-    totalBreakTime: 0,
-    lunchStarted: false,
-    lunchCompleted: false,
-    lunchStartTime: null,
-    lunchTotalTime: 0,
-    bioBreakStarted: false,
-    bioBreakStartTime: null,
-    systemIssueStarted: false,
-    systemIssueStartTime: null,
-    systemIssueTimer: null,
-    overbreakAlert: false
-};
-
-// DOM Elements
-const employeeNameInput = document.getElementById('employeeName');
-const employeeNameDisplay = document.getElementById('employeeNameDisplay');
-const employeeIdDisplay = document.getElementById('employeeId');
-const employeeAvatar = document.getElementById('employeeAvatar');
-const clockState = document.getElementById('clockState');
-const breakState = document.getElementById('breakState');
-const lunchState = document.getElementById('lunchState');
-const systemState = document.getElementById('systemState');
-const clockInBtn = document.getElementById('clockInBtn');
-const clockOutBtn = document.getElementById('clockOutBtn');
-const breakInBtn = document.getElementById('breakInBtn');
-const breakOutBtn = document.getElementById('breakOutBtn');
-const lunchInBtn = document.getElementById('lunchInBtn');
-const lunchOutBtn = document.getElementById('lunchOutBtn');
-const bioInBtn = document.getElementById('bioInBtn');
-const bioOutBtn = document.getElementById('bioOutBtn');
-const systemIssueBtn = document.getElementById('systemIssueBtn');
-const systemIssueDisplay = document.getElementById('systemIssueDisplay');
-const systemIssueStartTime = document.getElementById('systemIssueStartTime');
-const systemIssueDuration = document.getElementById('systemIssueDuration');
-const logEntries = document.getElementById('logEntries');
-const sheetsStatus = document.getElementById('sheetsStatus');
-
-// Initialize the app
-document.addEventListener('DOMContentLoaded', () => {
-    updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
-    
-    employeeNameInput.addEventListener('input', handleEmployeeInput);
-    testGoogleSheetsConnection();
-});
-
-function updateCurrentTime() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    document.getElementById('currentTime').textContent = timeString;
-}
-
-function handleEmployeeInput() {
-    const input = employeeNameInput.value.trim().toLowerCase();
-    if (!input) {
-        resetEmployeeDisplay();
-        return;
-    }
-
-    // Find employee in database
-    const employeeEntry = Object.entries(EMPLOYEE_DATABASE).find(([name]) => 
-        name.toLowerCase().includes(input) || 
-        EMPLOYEE_DATABASE[name].toLowerCase().includes(input)
-    );
-
-    if (employeeEntry) {
-        const [fullName, id] = employeeEntry;
-        employeeNameDisplay.textContent = fullName.split(' ').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
-        employeeIdDisplay.textContent = `ID: ${id}`;
-        employeeAvatar.textContent = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        
-        // Enable clock in button
-        clockInBtn.disabled = false;
-    } else {
-        resetEmployeeDisplay();
-        clockInBtn.disabled = true;
-    }
-}
-
-function resetEmployeeDisplay() {
-    employeeNameDisplay.textContent = 'John Doe';
-    employeeIdDisplay.textContent = 'ID: EMP-001';
-    employeeAvatar.textContent = 'JD';
-    clockInBtn.disabled = true;
-}
-
-async function clockAction(action, button) {
-    try {
-        // Get employee info
-        const employeeName = employeeNameDisplay.textContent;
-        const employeeId = employeeIdDisplay.textContent.replace('ID: ', '');
-        
-        // Prepare data
-        const now = new Date();
-        const data = {
-            date: now.toLocaleDateString('en-US'),
-            time: now.toLocaleTimeString('en-US'),
-            employeeName: employeeName,
-            employeeId: employeeId,
-            action: action,
-            duration: '',
-            issueDescription: ''
+        // State management object
+        const timeClockState = {
+            isClockedIn: false,
+            currentTask: 'Idle',
+            breakStartTime: null,
+            lunchStartTime: null,
+            bioStartTime: null,
+            systemIssueStartTime: null,
+            totalHoursTimer: null,
+            breakTimer: null,
+            systemIssueTimer: null,
+            totalSeconds: 0,
+            breakSeconds: 0,
+            systemIssueSeconds: 0
         };
 
-        // State-specific logic
-        switch(action) {
-            case 'Clock In':
-                timeClockState.clockedIn = true;
-                timeClockState.clockInTime = now;
-                clockInBtn.disabled = true;
-                clockOutBtn.disabled = false;
-                breakInBtn.disabled = false;
-                lunchInBtn.disabled = false;
-                bioInBtn.disabled = false;
-                systemIssueBtn.disabled = false;
-                clockState.textContent = 'Clocked In';
-                clockState.className = 'state-value state-active';
-                break;
-                
-            case 'Clock Out':
-                timeClockState.clockedIn = false;
-                clockOutBtn.disabled = true;
-                breakInBtn.disabled = true;
-                lunchInBtn.disabled = true;
-                bioInBtn.disabled = true;
-                systemIssueBtn.disabled = true;
-                clockState.textContent = 'Not Clocked In';
-                clockState.className = 'state-value state-inactive';
-                document.getElementById('thankYouPopup').classList.add('show');
-                break;
-                
-            case 'Break Start':
-                timeClockState.breakStarted = true;
-                timeClockState.breakStartTime = now;
-                breakInBtn.disabled = true;
-                breakOutBtn.disabled = false;
-                breakState.textContent = 'On Break';
-                breakState.className = 'state-value state-active';
-                break;
-                
-            case 'Break End':
-                timeClockState.breakStarted = false;
-                timeClockState.breakCompleted = true;
-                timeClockState.breakCount++;
-                breakInBtn.disabled = false;
-                breakOutBtn.disabled = true;
-                breakState.textContent = 'Break Completed';
-                breakState.className = 'state-value state-completed';
-                break;
-                
-            // Similar logic for Lunch, Bio Break, etc.
-        }
-
-        // Send data to Google Sheets
-        const response = await sendDataToSheets(data);
-        
-        // Log activity
-        addLogEntry(action);
-        
-        // Show success notification
-        showNotification(`Action "${action}" recorded successfully!`, 'success');
-        
-    } catch (error) {
-        console.error('Error in clockAction:', error);
-        showNotification(`Failed to record action: ${error.message}`, 'error');
-    }
-}
-
-async function sendDataToSheets(data) {
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error sending data to Sheets:', error);
-        throw error;
-    }
-}
-
-function addLogEntry(action) {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    
-    const logEntry = document.createElement('div');
-    logEntry.className = 'log-entry';
-    logEntry.innerHTML = `
-        <span class="log-action">${action}</span>
-        <span class="log-time">${timeString}</span>
-    `;
-    
-    logEntries.prepend(logEntry);
-}
-
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        ${message}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Show notification
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-    
-    // Hide after 3 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 400);
-    }, 3000);
-}
-
-async function testGoogleSheetsConnection() {
-    try {
-        sheetsStatus.innerHTML = '<i class="fas fa-sync fa-spin"></i> Testing connection...';
-        
-        const testData = {
-            date: 'Test Connection',
-            time: new Date().toLocaleTimeString(),
-            employeeName: 'Connection Test',
-            employeeId: 'TEST-001',
-            action: 'Connection Test',
-            duration: '',
-            issueDescription: ''
+        // DOM elements
+        const dom = {
+            currentTime: document.getElementById('currentTime'),
+            employeeNameInput: document.getElementById('employeeName'),
+            employeeNameDisplay: document.getElementById('employeeNameDisplay'),
+            employeeIdDisplay: document.getElementById('employeeId'),
+            employeeAvatar: document.getElementById('employeeAvatar'),
+            clockInButton: document.getElementById('clockInButton'),
+            clockOutButton: document.getElementById('clockOutButton'),
+            breakInButton: document.getElementById('breakInButton'),
+            breakOutButton: document.getElementById('breakOutButton'),
+            lunchInButton: document.getElementById('lunchInButton'),
+            lunchOutButton: document.getElementById('lunchOutButton'),
+            bioInButton: document.getElementById('bioInButton'),
+            bioOutButton: document.getElementById('bioOutButton'),
+            systemIssueButton: document.getElementById('systemIssueButton'),
+            resetButton: document.getElementById('resetButton'),
+            clockStatus: document.getElementById('clockStatus'),
+            totalHoursDisplay: document.getElementById('totalHours'),
+            currentTaskDisplay: document.getElementById('currentTask'),
+            breakTimerDisplay: document.getElementById('breakTimerDisplay'),
+            activityLog: document.getElementById('activityLog'),
+            notification: document.getElementById('notification'),
+            thankYouPopup: document.getElementById('thankYouPopup'),
+            popupMessage: document.getElementById('popupMessage'),
+            systemIssueDisplay: document.getElementById('systemIssueDisplay'),
+            systemIssueStartTime: document.getElementById('systemIssueStartTime'),
+            systemIssueDuration: document.getElementById('systemIssueDuration'),
+            overbreakAlert: document.getElementById('overbreakAlert'),
+            breakStartTimeAlert: document.getElementById('breakStartTimeAlert'),
+            overbreakDurationAlert: document.getElementById('overbreakDurationAlert'),
+            sheetsStatus: document.getElementById('sheetsStatus')
         };
 
-        const response = await sendDataToSheets(testData);
-        
-        if (response && response.status === 'success') {
-            sheetsStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connected to Sheets';
-            sheetsStatus.style.color = '#43e97b';
-        } else {
-            throw new Error('Invalid response from server');
+        // Helper functions
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
         }
-    } catch (error) {
-        console.error('Sheets connection test failed:', error);
-        sheetsStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Connection Failed';
-        sheetsStatus.style.color = '#ff6b6b';
-        showNotification('Failed to connect to Google Sheets. Check script permissions.', 'error');
-    }
-}
 
-function resetButtons() {
-    // Reset all buttons to initial state
-    clockInBtn.disabled = false;
-    clockOutBtn.disabled = true;
-    breakInBtn.disabled = true;
-    breakOutBtn.disabled = true;
-    lunchInBtn.disabled = true;
-    lunchOutBtn.disabled = true;
-    bioInBtn.disabled = true;
-    bioOutBtn.disabled = true;
-    systemIssueBtn.disabled = true;
-    
-    // Reset state indicators
-    clockState.textContent = 'Not Clocked In';
-    clockState.className = 'state-value state-inactive';
-    breakState.textContent = 'Not Started';
-    breakState.className = 'state-value state-inactive';
-    lunchState.textContent = 'Not Started';
-    lunchState.className = 'state-value state-inactive';
-    systemState.textContent = 'Not Started';
-    systemState.className = 'state-value state-inactive';
-    
-    // Reset state object
-    Object.keys(timeClockState).forEach(key => {
-        if (typeof timeClockState[key] === 'boolean') {
-            timeClockState[key] = false;
-        } else if (typeof timeClockState[key] === 'number') {
-            timeClockState[key] = 0;
-        } else {
-            timeClockState[key] = null;
+        function showNotification(message, type) {
+            dom.notification.textContent = message;
+            dom.notification.className = `notification show ${type}`;
+            dom.notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            setTimeout(() => {
+                dom.notification.classList.remove('show');
+            }, 3000);
         }
-    });
-    
-    // Clear system issue timer
-    if (timeClockState.systemIssueTimer) {
-        clearInterval(timeClockState.systemIssueTimer);
-        timeClockState.systemIssueTimer = null;
-    }
-    
-    // Hide system issue display
-    systemIssueDisplay.style.display = 'none';
-    
-    showNotification('All buttons and states have been reset', 'success');
-}
 
-function closeThankYouPopup() {
-    document.getElementById('thankYouPopup').classList.remove('show');
-}
+        function updateUI() {
+            dom.clockStatus.textContent = timeClockState.isClockedIn ? 'Online' : 'Offline';
+            dom.clockStatus.className = `state-value state-${timeClockState.isClockedIn ? 'active' : 'inactive'}`;
+            dom.currentTaskDisplay.textContent = timeClockState.currentTask;
+            dom.currentTaskDisplay.className = `state-value state-${timeClockState.currentTask === 'Idle' ? 'inactive' : 'active'}`;
+            dom.clockInButton.disabled = timeClockState.isClockedIn;
+            dom.clockOutButton.disabled = !timeClockState.isClockedIn;
+            dom.breakInButton.disabled = timeClockState.currentTask !== 'Idle';
+            dom.breakOutButton.disabled = timeClockState.currentTask !== 'Break';
+            dom.lunchInButton.disabled = timeClockState.currentTask !== 'Idle';
+            dom.lunchOutButton.disabled = timeClockState.currentTask !== 'Lunch';
+            dom.bioInButton.disabled = timeClockState.currentTask !== 'Idle';
+            dom.bioOutButton.disabled = timeClockState.currentTask !== 'Bio Break';
+        }
 
-function closeOverbreakAlert() {
-    document.getElementById('overbreakAlert').classList.remove('show');
-}
+        function updateTime() {
+            const now = new Date();
+            dom.currentTime.textContent = now.toLocaleString();
+        }
 
-// Add this at the end to create floating particles
-function createParticles() {
-    const container = document.getElementById('particlesContainer');
-    const particleCount = 50;
-    
-    for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
+        function updateTimers() {
+            if (timeClockState.isClockedIn) {
+                timeClockState.totalSeconds++;
+                dom.totalHoursDisplay.textContent = formatTime(timeClockState.totalSeconds);
+            }
+
+            if (timeClockState.breakStartTime) {
+                timeClockState.breakSeconds++;
+                dom.breakTimerDisplay.textContent = formatTime(timeClockState.breakSeconds);
+            }
+
+            if (timeClockState.systemIssueStartTime) {
+                timeClockState.systemIssueSeconds++;
+                dom.systemIssueDuration.textContent = formatTime(timeClockState.systemIssueSeconds);
+            }
+
+            // Check for overbreak (over 10 minutes)
+            if (timeClockState.breakSeconds > 600 && dom.overbreakAlert.classList.contains('show') === false) {
+                dom.overbreakAlert.classList.add('show');
+                dom.breakStartTimeAlert.textContent = new Date(timeClockState.breakStartTime).toLocaleTimeString();
+            }
+
+            if (dom.overbreakAlert.classList.contains('show')) {
+                const overbreakSeconds = timeClockState.breakSeconds - 600;
+                dom.overbreakDurationAlert.textContent = formatTime(overbreakSeconds);
+            }
+        }
+
+        function addLogEntry(action, duration = '') {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            logEntry.innerHTML = `
+                <div class="log-action">${action}</div>
+                <div class="log-time">${timeString}</div>
+            `;
+            dom.activityLog.prepend(logEntry);
+        }
+
+        // Action handlers
+        async function handleClockIn() {
+            const employeeName = dom.employeeNameInput.value.trim();
+            const employeeId = 'EMP-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+            if (!employeeName) {
+                showNotification('Please enter your name or ID to Clock In', 'warning');
+                return;
+            }
+
+            timeClockState.isClockedIn = true;
+            timeClockState.currentTask = 'Idle';
+            timeClockState.totalSeconds = 0;
+            dom.employeeNameDisplay.textContent = employeeName;
+            dom.employeeIdDisplay.textContent = `ID: ${employeeId}`;
+            dom.employeeAvatar.textContent = employeeName.split(' ').map(n => n[0]).join('').toUpperCase();
+
+            updateUI();
+            addLogEntry('Clock In');
+            showNotification('Successfully Clocked In!', 'success');
+
+            const now = new Date();
+            const data = {
+                employeeName: employeeName,
+                employeeId: employeeId,
+                action: 'Clock In',
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+            };
+            
+            try {
+                const response = await sendDataToSheets(data);
+                if (response.status === 'success') {
+                    showNotification('Data sent to Google Sheets!', 'success');
+                } else {
+                    showNotification(`Error: ${response.message}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function handleClockOut() {
+            timeClockState.isClockedIn = false;
+            timeClockState.currentTask = 'Idle';
+            const totalHours = formatTime(timeClockState.totalSeconds);
+            clearInterval(timeClockState.totalHoursTimer);
+            timeClockState.totalHoursTimer = null;
+
+            updateUI();
+            addLogEntry(`Clock Out (${totalHours})`);
+            
+            // Show thank you popup
+            dom.popupMessage.textContent = `Your clock-out has been recorded. You worked for a total of ${totalHours}. Have a great day!`;
+            dom.thankYouPopup.classList.add('show');
+            
+            const now = new Date();
+            const data = {
+                employeeName: dom.employeeNameDisplay.textContent,
+                employeeId: dom.employeeIdDisplay.textContent,
+                action: 'Clock Out',
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                duration: totalHours
+            };
+
+            try {
+                const response = await sendDataToSheets(data);
+                if (response.status === 'success') {
+                    showNotification('Data sent to Google Sheets!', 'success');
+                } else {
+                    showNotification(`Error: ${response.message}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function handleBreakIn(type) {
+            if (!timeClockState.isClockedIn) {
+                showNotification('Please Clock In first', 'warning');
+                return;
+            }
+
+            if (timeClockState.currentTask !== 'Idle') {
+                showNotification('Please complete your current task first', 'warning');
+                return;
+            }
+
+            timeClockState.currentTask = type;
+            if (type === 'Break') {
+                timeClockState.breakStartTime = new Date();
+                timeClockState.breakSeconds = 0;
+            } else if (type === 'Lunch') {
+                timeClockState.lunchStartTime = new Date();
+            } else if (type === 'Bio Break') {
+                timeClockState.bioStartTime = new Date();
+            }
+
+            updateUI();
+            addLogEntry(`${type} In`);
+            showNotification(`Enjoy your ${type}!`, 'success');
+
+            const now = new Date();
+            const data = {
+                employeeName: dom.employeeNameDisplay.textContent,
+                employeeId: dom.employeeIdDisplay.textContent,
+                action: `${type} In`,
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+            };
+
+            try {
+                const response = await sendDataToSheets(data);
+                if (response.status === 'success') {
+                    showNotification('Data sent to Google Sheets!', 'success');
+                } else {
+                    showNotification(`Error: ${response.message}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function handleBreakOut(type) {
+            if (timeClockState.currentTask !== type) {
+                showNotification(`You are not currently on ${type}.`, 'warning');
+                return;
+            }
+
+            timeClockState.currentTask = 'Idle';
+            let duration = '';
+            if (type === 'Break') {
+                timeClockState.breakStartTime = null;
+                duration = formatTime(timeClockState.breakSeconds);
+                timeClockState.breakSeconds = 0;
+                dom.breakTimerDisplay.textContent = '00:00:00';
+            } else if (type === 'Lunch') {
+                timeClockState.lunchStartTime = null;
+            } else if (type === 'Bio Break') {
+                timeClockState.bioStartTime = null;
+            }
+
+            updateUI();
+            addLogEntry(`${type} Out (${duration})`);
+            showNotification(`Welcome back from your ${type}!`, 'success');
+
+            const now = new Date();
+            const data = {
+                employeeName: dom.employeeNameDisplay.textContent,
+                employeeId: dom.employeeIdDisplay.textContent,
+                action: `${type} Out`,
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                duration: duration
+            };
+            
+            try {
+                const response = await sendDataToSheets(data);
+                if (response.status === 'success') {
+                    showNotification('Data sent to Google Sheets!', 'success');
+                } else {
+                    showNotification(`Error: ${response.message}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        function handleSystemIssue() {
+            if (timeClockState.systemIssueStartTime) {
+                // End system issue
+                timeClockState.systemIssueStartTime = null;
+                dom.systemIssueButton.classList.remove('system-issue-active');
+                dom.systemIssueButton.textContent = 'System Issue';
+                
+                clearInterval(timeClockState.systemIssueTimer);
+                timeClockState.systemIssueTimer = null;
+                
+                const duration = formatTime(timeClockState.systemIssueSeconds);
+                timeClockState.systemIssueSeconds = 0;
+                dom.systemIssueDisplay.style.display = 'none';
+
+                addLogEntry(`System Issue Resolved (${duration})`);
+                showNotification('System issue resolved. Time clock active.', 'success');
+                
+                // Re-enable all buttons
+                dom.clockInButton.disabled = false;
+                dom.clockOutButton.disabled = !timeClockState.isClockedIn;
+                dom.breakInButton.disabled = false;
+                dom.breakOutButton.disabled = true;
+                dom.lunchInButton.disabled = false;
+                dom.lunchOutButton.disabled = true;
+                dom.bioInButton.disabled = false;
+                dom.bioOutButton.disabled = true;
+            } else {
+                // Start system issue
+                timeClockState.systemIssueStartTime = new Date();
+                timeClockState.systemIssueSeconds = 0;
+                dom.systemIssueButton.classList.add('system-issue-active');
+                dom.systemIssueButton.innerHTML = `<i class="fas fa-check-circle"></i> Resolve Issue`;
+                
+                // Display system issue panel
+                dom.systemIssueDisplay.style.display = 'block';
+                dom.systemIssueStartTime.textContent = `Start Time: ${timeClockState.systemIssueStartTime.toLocaleTimeString()}`;
+
+                // Disable all other buttons
+                const allButtons = document.querySelectorAll('.clock-button');
+                allButtons.forEach(button => {
+                    if (button.id !== 'systemIssueButton') {
+                        button.disabled = true;
+                    }
+                });
+
+                timeClockState.systemIssueTimer = setInterval(() => {
+                    timeClockState.systemIssueSeconds++;
+                    dom.systemIssueDuration.textContent = formatTime(timeClockState.systemIssueSeconds);
+                }, 1000);
+
+                addLogEntry('System Issue Reported');
+                showNotification('System issue reported. All other functions are disabled.', 'warning');
+            }
+        }
+
+        // Reset function
+        function handleReset() {
+            // Stop all timers
+            clearInterval(timeClockState.totalHoursTimer);
+            clearInterval(timeClockState.breakTimer);
+            clearInterval(timeClockState.systemIssueTimer);
+
+            // Reset all state variables
+            timeClockState.isClockedIn = false;
+            timeClockState.currentTask = 'Idle';
+            timeClockState.breakStartTime = null;
+            timeClockState.lunchStartTime = null;
+            timeClockState.bioStartTime = null;
+            timeClockState.systemIssueStartTime = null;
+            timeClockState.totalHoursTimer = null;
+            timeClockState.breakTimer = null;
+            timeClockState.systemIssueTimer = null;
+            timeClockState.totalSeconds = 0;
+            timeClockState.breakSeconds = 0;
+            timeClockState.systemIssueSeconds = 0;
+
+            // Reset UI
+            dom.employeeNameInput.value = '';
+            dom.employeeNameDisplay.textContent = 'John Doe';
+            dom.employeeIdDisplay.textContent = 'ID: EMP-001';
+            dom.employeeAvatar.textContent = 'JD';
+            dom.clockStatus.textContent = 'Offline';
+            dom.totalHoursDisplay.textContent = '00:00:00';
+            dom.currentTaskDisplay.textContent = 'Idle';
+            dom.breakTimerDisplay.textContent = '00:00:00';
+            dom.activityLog.innerHTML = '<h3>Activity Log</h3>';
+            
+            dom.systemIssueDisplay.style.display = 'none';
+            dom.systemIssueButton.classList.remove('system-issue-active');
+            dom.systemIssueButton.textContent = 'System Issue';
+
+            updateUI();
+            showNotification('All buttons and states have been reset', 'success');
+        }
+
+        // Event listeners
+        dom.clockInButton.addEventListener('click', handleClockIn);
+        dom.clockOutButton.addEventListener('click', handleClockOut);
+        dom.breakInButton.addEventListener('click', () => handleBreakIn('Break'));
+        dom.breakOutButton.addEventListener('click', () => handleBreakOut('Break'));
+        dom.lunchInButton.addEventListener('click', () => handleBreakIn('Lunch'));
+        dom.lunchOutButton.addEventListener('click', () => handleBreakOut('Lunch'));
+        dom.bioInButton.addEventListener('click', () => handleBreakIn('Bio Break'));
+        dom.bioOutButton.addEventListener('click', () => handleBreakOut('Bio Break'));
+        dom.systemIssueButton.addEventListener('click', handleSystemIssue);
+        dom.resetButton.addEventListener('click', handleReset);
+
+        // Initial setup
+        setInterval(updateTime, 1000);
+        timeClockState.totalHoursTimer = setInterval(updateTimers, 1000);
+        updateTime();
+        updateUI();
+        createParticles(); // Particle animation
+
+        function closeThankYouPopup() {
+            dom.thankYouPopup.classList.remove('show');
+        }
+
+        function closeOverbreakAlert() {
+            dom.overbreakAlert.classList.remove('show');
+        }
+
+        // This function sends data to the Google Sheets web app.
+        // It has been updated to use FormData to avoid CORS issues.
+        async function sendDataToSheets(data) {
+            try {
+                // Create a FormData object to send the data.
+                const formData = new FormData();
+                for (const key in data) {
+                    formData.append(key, data[key]);
+                }
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error sending data to Sheets:', error);
+                throw error;
+            }
+        }
         
-        // Random position
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        
-        // Random size
-        const size = Math.random() * 5 + 2;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        // Random animation delay
-        particle.style.animationDelay = `${Math.random() * 15}s`;
-        
-        container.appendChild(particle);
-    }
-}
+        async function testGoogleSheetsConnection() {
+            dom.sheetsStatus.textContent = 'Connecting...';
+            dom.sheetsStatus.style.color = '#ffb74d';
+            dom.sheetsStatus.classList.add('pulse');
+            
+            try {
+                const testData = {
+                    employeeName: 'Connection Test',
+                    employeeId: 'TEST-001',
+                    action: 'Connection Test',
+                    date: new Date().toLocaleDateString(),
+                    time: new Date().toLocaleTimeString(),
+                };
+                const response = await sendDataToSheets(testData);
+                if (response.status === 'success') {
+                    dom.sheetsStatus.textContent = 'Connected';
+                    dom.sheetsStatus.style.color = '#43e97b';
+                    showNotification('Connection to Google Sheets is successful!', 'success');
+                } else {
+                    dom.sheetsStatus.textContent = 'Failed';
+                    dom.sheetsStatus.style.color = '#f5576c';
+                    showNotification('Failed to connect to Google Sheets.', 'error');
+                }
+            } catch (error) {
+                dom.sheetsStatus.textContent = 'Failed';
+                dom.sheetsStatus.style.color = '#f5576c';
+                console.error('Sheets connection test failed:', error);
+                showNotification('Sheets connection test failed.', 'error');
+            } finally {
+                dom.sheetsStatus.classList.remove('pulse');
+            }
+        }
 
-// Initialize particles
-createParticles();
-</script>
+        // Add this at the end to create floating particles
+        function createParticles() {
+            const container = document.getElementById('particlesContainer');
+            const particleCount = 50;
 
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
 
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+
+                // Random size
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                // Random animation delay
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+
+                container.appendChild(particle);
+            }
+        }
+
+    </script>
+</body>
+</html>
