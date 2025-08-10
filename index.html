@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Time Clock | Production System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
@@ -30,1139 +32,866 @@
             padding: 40px;
             width: 95%;
             max-width: 1000px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: rotate 20s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .title {
-            font-size: 3rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 4s ease-in-out infinite;
-            margin-bottom: 10px;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .current-time {
-            font-size: 1.8rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            margin-bottom: 20px;
-        }
-
-        .employee-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .employee-input {
-            width: 100%;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            outline: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .employee-input:focus {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-        }
-
-        .button-grid {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
         }
 
-        @media (min-width: 768px) {
-            .button-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .clock-button {
-            padding: 20px 15px;
-            border: none;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: white;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .time-panel, .control-panel {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
         }
 
-        .clock-button i {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
-
-        .clock-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s;
-        }
-
-        .clock-button:hover::before {
-            left: 100%;
-        }
-
-        .clock-button:hover:not(:disabled) {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .clock-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .clock-button:disabled::before {
-            display: none;
-        }
-
-        .clock-in { background: linear-gradient(135deg, #43CBFF, #9708CC); }
-        .clock-out { background: linear-gradient(135deg, #F5515F, #9F041B); }
-        .break-in { background: linear-gradient(135deg, #42E695, #3BB2B8); }
-        .break-out { background: linear-gradient(135deg, #FDD819, #E80505); }
-        .lunch-in { background: linear-gradient(135deg, #FFCF71, #2376DD); }
-        .lunch-out { background: linear-gradient(135deg, #FF7CA8, #FF0169); }
-        .bio-in { background: linear-gradient(135deg, #A0FE65, #FA016D); }
-        .bio-out { background: linear-gradient(135deg, #FFE000, #799F0C); }
-        .system-issue { background: linear-gradient(135deg, #FF416C, #FF4B2B); }
-        .system-issue-active { background: linear-gradient(135deg, #0BA360, #3CBA92); }
-
-        .state-indicators {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        @media (min-width: 768px) {
-            .state-indicators {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .state-indicator {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 15px;
+        .time-panel {
             text-align: center;
         }
 
-        .state-label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-
-        .state-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .state-active {
-            color: #43e97b;
-        }
-
-        .state-completed {
-            color: #FFD700;
-        }
-
-        .state-inactive {
-            color: #f5576c;
-        }
-
-        .state-overbreak {
-            color: #FF6B6B;
-            animation: pulse 1s infinite;
-        }
-
-        .employee-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-        }
-
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #5ee7df, #b490ca);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: white;
-            margin-right: 15px;
-            font-weight: bold;
-        }
-
-        .employee-details {
-            flex: 1;
-        }
-
-        .employee-name {
-            font-size: 1.4rem;
-            color: white;
-            font-weight: 600;
+        #currentTime {
+            font-size: 4rem;
+            font-weight: 300;
             margin-bottom: 5px;
         }
 
-        .employee-id {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-        }
-
-        .activity-log {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            max-height: 300px;
-            overflow-y: auto;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 20px;
-        }
-
-        .activity-log h3 {
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
+        #currentDate {
             font-size: 1.5rem;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 10px;
+            opacity: 0.8;
+            margin-bottom: 20px;
         }
-
-        .log-entry {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+        
+        .employee-info {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            transition: all 0.3s ease;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .log-entry:hover {
-            transform: translateX(5px);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .log-action {
-            color: #4ecdc4;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .log-time {
-            color: white;
-            font-size: 1rem;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 18px 28px;
-            border-radius: 15px;
-            color: white;
-            font-weight: 600;
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.4s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            font-size: 1.1rem;
-        }
-
-        .notification i {
-            margin-right: 15px;
-            font-size: 1.8rem;
-        }
-
-        .notification.success {
-            background: linear-gradient(135deg, #0BA360, #3CBA92);
-            border-left: 5px solid #3CBA92;
-        }
-
-        .notification.error {
-            background: linear-gradient(135deg, #FF416C, #FF4B2B);
-            border-left: 5px solid #FF416C;
-        }
-
-        .notification.warning {
-            background: linear-gradient(135deg, #FDBB2D, #22C1C3);
-            border-left: 5px solid #FDBB2D;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(78, 205, 196, 0); }
-            100% { transform: scale(1); }
-        }
-
-        .floating-particles {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .employee-info input {
             width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            animation: float 15s infinite linear;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .reset-button {
-            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-            color: white;
-            border: none;
-            padding: 12px 25px;
+            max-width: 300px;
+            padding: 10px;
             border-radius: 10px;
-            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
             font-size: 1rem;
+            text-align: center;
+        }
+
+        .employee-info input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .employee-info input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+        
+        .employee-details {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .employee-details #employeeName,
+        .employee-details #employeeId {
             font-weight: 600;
-            margin-top: 15px;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .status-badge.working {
+            background: #28a745;
+        }
+
+        .status-badge.on-break {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .status-badge.off-shift {
+            background: #dc3545;
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .control-panel .grid-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
+            gap: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .reset-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        .btn:hover:not(:disabled) {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
-        .reset-button i {
-            margin-right: 8px;
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.7s ease-in-out;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 0;
         }
 
+        .btn:hover:not(:disabled)::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .btn i {
+            font-size: 1.5em;
+            z-index: 1;
+        }
+
+        .btn span {
+            z-index: 1;
+        }
+
+        .btn-start-shift {
+            background: linear-gradient(45deg, #28a745, #218838);
+        }
+
+        .btn-end-shift {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+
+        .btn-start-break {
+            background: linear-gradient(45deg, #1E7EFC, #1369c7);
+            color: #fff;
+        }
+
+        .btn-system-issue {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            color: #333;
+        }
+
+        .btn-end-break {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+        }
+
+        .btn-start-lunch {
+            background: linear-gradient(45deg, #FB64B6, #d74d9e);
+            color: #fff;
+        }
+        
+        .btn-end-lunch {
+            background: linear-gradient(45deg, #38D5BE, #2fa390);
+        }
+        
+        .btn-reset {
+            background: linear-gradient(45deg, #62748E, #4d5b74);
+        }
+        
+        .system-issue-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .system-issue-display h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 300px;
+        }
+        
+        .notification {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(120%);
+            transition: transform 0.5s ease-in-out;
+            position: relative;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 5px solid #28a745;
+        }
+        
+        .notification.error {
+            border-left: 5px solid #dc3545;
+        }
+        
+        .notification.info {
+            border-left: 5px solid #17a2b8;
+        }
+        
+        .notification .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            opacity: 0.7;
+        }
+        
         .popup-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 200;
         }
-
+        
         .popup-overlay.show {
             opacity: 1;
             visibility: visible;
         }
-
+        
         .popup-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 25px;
-            padding: 50px;
-            max-width: 600px;
-            width: 90%;
+            padding: 40px;
+            border-radius: 20px;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            transform: scale(0.8);
-            transition: transform 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #1a2a6c, #1a2a6c);
         }
-
+        
         .popup-overlay.show .popup-content {
             transform: scale(1);
         }
-
-        .popup-title {
+        
+        #thankYouPopup .popup-content {
+            background: #1EEAFC;
+            color: #333;
+        }
+        
+        #issueDescribePopup .popup-content {
+            background: #FC1E91;
+            color: #fff;
+        }
+        
+        #thankYouPopup h2, #thankYouPopup p {
+            color: #333;
+        }
+        
+        .popup-content h2 {
             font-size: 2.5rem;
-            color: white;
-            margin-bottom: 30px;
-            font-weight: 700;
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 4s ease-in-out infinite;
+            margin-bottom: 20px;
         }
-
-        .popup-message {
-            font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.95);
+        
+        .popup-content p {
+            font-size: 1.2rem;
             line-height: 1.6;
-            margin-bottom: 40px;
-            font-weight: 500;
         }
-
-        .popup-close {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .popup-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-
-        .system-issue-display {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-            border-left: 5px solid #FF416C;
-            display: none;
-        }
-
-        .system-issue-title {
-            font-size: 1.5rem;
-            color: white;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .system-issue-time {
-            font-size: 1.2rem;
-            color: #FF416C;
-            font-weight: bold;
-        }
-
-        .system-duration {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #FFD700;
-            margin-top: 10px;
-        }
-
-        .sheets-status {
+        
+        .popup-content .close-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            color: #FFD700;
-            z-index: 10;
-        }
-
-        /* Overbreak Alert Styles */
-        .overbreak-alert {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #FF416C, #FF4B2B);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            z-index: 3000;
-            box-shadow: 0 25px 50px rgba(255, 65, 108, 0.5);
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-            animation: alertPulse 1s infinite;
-        }
-
-        .overbreak-alert.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        @keyframes alertPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.05); }
-        }
-
-        .overbreak-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .overbreak-message {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .overbreak-time {
+            top: 15px;
+            right: 20px;
             font-size: 1.5rem;
-            font-weight: bold;
-            color: #FFD700;
-            margin-bottom: 20px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        #thankYouPopup .close-btn {
+            color: white;
         }
 
-        .break-timers {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+        .popup-content .close-btn:hover {
+            color: white;
         }
-
-        .break-timer {
+        
+        .popup-content textarea {
+            width: 100%;
+            height: 100px;
             background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             padding: 10px;
-            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1rem;
         }
 
-        .break-timer-label {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            opacity: 0.8;
+        .popup-content textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .btn-submit-issue {
+            background: linear-gradient(45deg, #1E7EFC, #1369c7);
         }
 
-        .break-timer-value {
-            font-size: 1.1rem;
-            font-weight: bold;
+        #particlesContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+            50% { transform: translateY(-500px) rotate(180deg); opacity: 0; }
+            100% { transform: translateY(0) rotate(360deg); opacity: 0.5; }
         }
 
-        .break-timer.overbreak {
-            background: rgba(255, 107, 107, 0.3);
-            border: 2px solid #FF6B6B;
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            #currentTime {
+                font-size: 3rem;
+            }
+            
+            #currentDate {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="floating-particles" id="particlesContainer"></div>
+    <div id="particlesContainer"></div>
     <div class="container">
-        <div class="sheets-status" id="sheetsStatus">
-            <i class="fas fa-wifi"></i> Needs Setup
+        <div class="time-panel">
+            <div id="currentTime"></div>
+            <div id="currentDate"></div>
+            <div class="employee-info">
+                <input type="text" id="employeeNameInput" placeholder="Enter your name" />
+                <div class="employee-details">
+                    Name: <span id="employeeName"></span><br>
+                    ID: <span id="employeeId"></span>
+                </div>
+            </div>
+            <div class="status-badge" id="statusBadge">Off Shift</div>
+            <div id="timerDisplay" class="status-badge" style="display: none;">00:00:00</div>
+            <div id="systemIssueDisplay" class="system-issue-display" style="display: none;">
+                <h3>System Issue Detected</h3>
+                <p>Please contact support for assistance.</p>
+            </div>
         </div>
-        <div class="header">
-            <h1 class="title">EMPLOYEE TIME CLOCK</h1>
-            <div class="current-time" id="currentTime"></div>
-        </div>
-        <div class="employee-info">
-            <div class="avatar" id="employeeAvatar">JD</div>
-            <div class="employee-details">
-                <div class="employee-name" id="employeeNameDisplay">John Doe</div>
-                <div class="employee-id" id="employeeId">ID: EMP-001</div>
+
+        <div class="control-panel">
+            <div class="grid-col">
+                <button id="startShiftBtn" class="btn btn-start-shift">
+                    <i class="fa-solid fa-play"></i>
+                    Start Shift
+                </button>
+                <button id="startBreakBtn" class="btn btn-start-break" disabled>
+                    <i class="fa-solid fa-mug-saucer"></i>
+                    Start Break
+                </button>
+                <button id="startLunchBtn" class="btn btn-start-lunch" disabled>
+                    <i class="fa-solid fa-utensils"></i>
+                    Start Lunch
+                </button>
+                <button id="systemIssueBtn" class="btn btn-system-issue">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    System Issue
+                </button>
             </div>
-        </div>
-        <div class="employee-section">
-            <input type="text" class="employee-input" id="employeeName" placeholder="Enter Employee Name or ID">
-            <div class="state-indicators">
-                <div class="state-indicator">
-                    <div class="state-label">Clock Status</div>
-                    <div class="state-value" id="clockStatus">Offline</div>
-                </div>
-                <div class="state-indicator">
-                    <div class="state-label">Total Hours</div>
-                    <div class="state-value" id="totalHours">00:00:00</div>
-                </div>
-                <div class="state-indicator">
-                    <div class="state-label">Current Task</div>
-                    <div class="state-value" id="currentTask">Idle</div>
-                </div>
-                <div class="state-indicator">
-                    <div class="state-label">Break Time</div>
-                    <div class="state-value" id="breakTimerDisplay">00:00:00</div>
-                </div>
+            <div class="grid-col">
+                <button id="endShiftBtn" class="btn btn-end-shift" disabled>
+                    <i class="fa-solid fa-stop"></i>
+                    End Shift
+                </button>
+                <button id="endBreakBtn" class="btn btn-end-break" disabled>
+                    <i class="fa-solid fa-circle-check"></i>
+                    End Break
+                </button>
+                <button id="endLunchBtn" class="btn btn-end-lunch" disabled>
+                    <i class="fa-solid fa-circle-check"></i>
+                    End Lunch
+                </button>
+                <button id="resetStateBtn" class="btn btn-reset">
+                    <i class="fa-solid fa-rotate"></i>
+                    Reset State
+                </button>
             </div>
-            <div class="button-grid">
-                <button class="clock-button clock-in" id="clockInButton"><i class="fas fa-sign-in-alt"></i> Clock In</button>
-                <button class="clock-button clock-out" id="clockOutButton" disabled><i class="fas fa-sign-out-alt"></i> Clock Out</button>
-                <button class="clock-button break-in" id="breakInButton" disabled><i class="fas fa-coffee"></i> Break In</button>
-                <button class="clock-button break-out" id="breakOutButton" disabled><i class="fas fa-mug-hot"></i> Break Out</button>
-                <button class="clock-button lunch-in" id="lunchInButton" disabled><i class="fas fa-utensils"></i> Lunch In</button>
-                <button class="clock-button lunch-out" id="lunchOutButton" disabled><i class="fas fa-check"></i> Lunch Out</button>
-                <button class="clock-button bio-in" id="bioInButton" disabled><i class="fas fa-hand-holding-water"></i> Bio Break In</button>
-                <button class="clock-button bio-out" id="bioOutButton" disabled><i class="fas fa-hands-wash"></i> Bio Break Out</button>
-                <button class="clock-button system-issue" id="systemIssueButton"><i class="fas fa-exclamation-triangle"></i> System Issue</button>
-            </div>
-            <div class="system-issue-display" id="systemIssueDisplay">
-                <div class="system-issue-title">System Issue Active</div>
-                <div class="system-issue-time" id="systemIssueStartTime"></div>
-                <div class="system-duration" id="systemIssueDuration">00:00:00</div>
-            </div>
-            <div class="activity-log" id="activityLog">
-                <h3>Activity Log</h3>
-            </div>
-            <button class="reset-button" id="resetButton"><i class="fas fa-redo"></i> Reset All</button>
         </div>
     </div>
-    <div class="notification" id="notification"></div>
-    <div class="popup-overlay" id="thankYouPopup">
+    
+    <div id="thankYouPopup" class="popup-overlay">
         <div class="popup-content">
-            <h2 class="popup-title">Thank You!</h2>
-            <p class="popup-message" id="popupMessage">Your clock-out has been recorded. Have a great day!</p>
-            <button class="popup-close" onclick="closeThankYouPopup()">Close</button>
+            <span class="close-btn" onclick="closeThankYouPopup()">&times;</span>
+            <h2>Thank You!</h2>
+            <p>Your shift has been successfully ended.</p>
+            <p>Have a wonderful day!</p>
         </div>
-    </div>
-    <div class="overbreak-alert" id="overbreakAlert">
-        <div class="overbreak-title">OVERBREAK ALERT!</div>
-        <p class="overbreak-message">You have exceeded your allotted break time. Please clock out of your break immediately.</p>
-        <div class="break-timers">
-            <div class="break-timer">
-                <div class="break-timer-label">Break Started</div>
-                <div class="break-timer-value" id="breakStartTimeAlert"></div>
-            </div>
-            <div class="break-timer overbreak">
-                <div class="break-timer-label">Overbreak Duration</div>
-                <div class="break-timer-value" id="overbreakDurationAlert"></div>
-            </div>
-        </div>
-        <button class="popup-close" onclick="closeOverbreakAlert()">I Understand</button>
     </div>
 
+    <div id="overbreakAlert" class="popup-overlay">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeOverbreakAlert()">&times;</span>
+            <h2>Overbreak Alert!</h2>
+            <p>You are overbreak. Please clock back in.</p>
+        </div>
+    </div>
+
+    <div id="notificationContainer" class="notification-container"></div>
+    
     <script>
-        // *** IMPORTANT: You must replace this with your Google Apps Script Web App URL ***
+        // DOM element references
+        const elements = {
+            currentTime: document.getElementById('currentTime'),
+            currentDate: document.getElementById('currentDate'),
+            statusBadge: document.getElementById('statusBadge'),
+            timerDisplay: document.getElementById('timerDisplay'),
+            startShiftBtn: document.getElementById('startShiftBtn'),
+            endShiftBtn: document.getElementById('endShiftBtn'),
+            startBreakBtn: document.getElementById('startBreakBtn'),
+            endBreakBtn: document.getElementById('endBreakBtn'),
+            startLunchBtn: document.getElementById('startLunchBtn'),
+            endLunchBtn: document.getElementById('endLunchBtn'),
+            resetStateBtn: document.getElementById('resetStateBtn'),
+            systemIssueBtn: document.getElementById('systemIssueBtn'),
+            systemIssueDisplay: document.getElementById('systemIssueDisplay'),
+            notificationContainer: document.getElementById('notificationContainer'),
+            thankYouPopup: document.getElementById('thankYouPopup'),
+            overbreakAlert: document.getElementById('overbreakAlert'),
+            employeeNameInput: document.getElementById('employeeNameInput'),
+            employeeNameDisplay: document.getElementById('employeeName'),
+            employeeIdDisplay: document.getElementById('employeeId'),
+        };
+
+        // Time clock state management
+        const timeClockState = {
+            status: 'off-shift',
+            timer: 0,
+            timerInterval: null,
+            breakStartTime: null,
+            isOverbreak: false,
+            breaksTaken: 0,
+            lunchTaken: 0,
+            eventStartTime: null,
+            lastBreakType: null,
+            isSystemIssueActive: false,
+        };
+
+        // Time limits in seconds
+        const maxBreakTime = 15 * 60; // 15 minutes
+        const maxLunchTime = 60 * 60; // 1 hour
+
+        // Google Apps Script URL for data submission
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzS0ie2AOu4qIU8HxY4ZJe5jPQMPxMGfN1IT10KcRBm-e67kqwKPqastnfXEgLbalx/exec';
 
-        // State management object
-        const timeClockState = {
-            isClockedIn: false,
-            currentTask: 'Idle',
-            breakStartTime: null,
-            lunchStartTime: null,
-            bioStartTime: null,
-            systemIssueStartTime: null,
-            totalHoursTimer: null,
-            breakTimer: null,
-            systemIssueTimer: null,
-            totalSeconds: 0,
-            breakSeconds: 0,
-            systemIssueSeconds: 0
+        // Mock employee database to look up employee ID
+        const employeeDatabase = {
+            'maria theresa stephanie bamba': '2023-0020',
+            'gina silvano': '2023-0021',
+            'letty malasarte': '2023-0023',
+	        'luigi miguel ignacio': '2023-0031',
+	        'john kevin de leon': '2024-0222',
         };
 
-        // DOM elements
-        const dom = {
-            currentTime: document.getElementById('currentTime'),
-            employeeNameInput: document.getElementById('employeeName'),
-            employeeNameDisplay: document.getElementById('employeeNameDisplay'),
-            employeeIdDisplay: document.getElementById('employeeId'),
-            employeeAvatar: document.getElementById('employeeAvatar'),
-            clockInButton: document.getElementById('clockInButton'),
-            clockOutButton: document.getElementById('clockOutButton'),
-            breakInButton: document.getElementById('breakInButton'),
-            breakOutButton: document.getElementById('breakOutButton'),
-            lunchInButton: document.getElementById('lunchInButton'),
-            lunchOutButton: document.getElementById('lunchOutButton'),
-            bioInButton: document.getElementById('bioInButton'),
-            bioOutButton: document.getElementById('bioOutButton'),
-            systemIssueButton: document.getElementById('systemIssueButton'),
-            resetButton: document.getElementById('resetButton'),
-            clockStatus: document.getElementById('clockStatus'),
-            totalHoursDisplay: document.getElementById('totalHours'),
-            currentTaskDisplay: document.getElementById('currentTask'),
-            breakTimerDisplay: document.getElementById('breakTimerDisplay'),
-            activityLog: document.getElementById('activityLog'),
-            notification: document.getElementById('notification'),
-            thankYouPopup: document.getElementById('thankYouPopup'),
-            popupMessage: document.getElementById('popupMessage'),
-            systemIssueDisplay: document.getElementById('systemIssueDisplay'),
-            systemIssueStartTime: document.getElementById('systemIssueStartTime'),
-            systemIssueDuration: document.getElementById('systemIssueDuration'),
-            overbreakAlert: document.getElementById('overbreakAlert'),
-            breakStartTimeAlert: document.getElementById('breakStartTimeAlert'),
-            overbreakDurationAlert: document.getElementById('overbreakDurationAlert'),
-            sheetsStatus: document.getElementById('sheetsStatus')
-        };
+        /**
+         * Sends time clock data to the Google Sheet via the Apps Script URL.
+         * @param {string} event - The type of event (e.g., 'Start Shift').
+         * @param {number} durationInSeconds - The duration of the event in seconds.
+         * @param {string} issueDescription - The description of a system issue.
+         */
+        async function submitDataToGoogleSheet(event, durationInSeconds = 0, issueDescription = '') {
+            const employeeName = elements.employeeNameDisplay.textContent;
+            const employeeId = elements.employeeIdDisplay.textContent;
+            
+            if (!employeeName || !employeeId) {
+                showNotification('Employee name and ID are required to log data.', 'error');
+                return;
+            }
 
-        // Helper functions
-        function formatTime(seconds) {
-            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
-            return `${h}:${m}:${s}`;
-        }
-
-        function showNotification(message, type) {
-            dom.notification.textContent = message;
-            dom.notification.className = `notification show ${type}`;
-            dom.notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
-            setTimeout(() => {
-                dom.notification.classList.remove('show');
-            }, 3000);
-        }
-
-        function updateUI() {
-            dom.clockStatus.textContent = timeClockState.isClockedIn ? 'Online' : 'Offline';
-            dom.clockStatus.className = `state-value state-${timeClockState.isClockedIn ? 'active' : 'inactive'}`;
-            dom.currentTaskDisplay.textContent = timeClockState.currentTask;
-            dom.currentTaskDisplay.className = `state-value state-${timeClockState.currentTask === 'Idle' ? 'inactive' : 'active'}`;
-            dom.clockInButton.disabled = timeClockState.isClockedIn;
-            dom.clockOutButton.disabled = !timeClockState.isClockedIn;
-            dom.breakInButton.disabled = timeClockState.currentTask !== 'Idle';
-            dom.breakOutButton.disabled = timeClockState.currentTask !== 'Break';
-            dom.lunchInButton.disabled = timeClockState.currentTask !== 'Idle';
-            dom.lunchOutButton.disabled = timeClockState.currentTask !== 'Lunch';
-            dom.bioInButton.disabled = timeClockState.currentTask !== 'Idle';
-            dom.bioOutButton.disabled = timeClockState.currentTask !== 'Bio Break';
-        }
-
-        function updateTime() {
             const now = new Date();
-            dom.currentTime.textContent = now.toLocaleString();
-        }
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString();
 
-        function updateTimers() {
-            if (timeClockState.isClockedIn) {
-                timeClockState.totalSeconds++;
-                dom.totalHoursDisplay.textContent = formatTime(timeClockState.totalSeconds);
+            const formData = new FormData();
+            formData.append('event', event);
+            formData.append('employeeName', employeeName);
+            formData.append('employeeId', employeeId);
+            formData.append('date', date);
+            formData.append('time', time);
+            formData.append('duration', durationInSeconds);
+            if (issueDescription) {
+                formData.append('issueDescription', issueDescription);
             }
 
-            if (timeClockState.breakStartTime) {
-                timeClockState.breakSeconds++;
-                dom.breakTimerDisplay.textContent = formatTime(timeClockState.breakSeconds);
-            }
-
-            if (timeClockState.systemIssueStartTime) {
-                timeClockState.systemIssueSeconds++;
-                dom.systemIssueDuration.textContent = formatTime(timeClockState.systemIssueSeconds);
-            }
-
-            // Check for overbreak (over 10 minutes)
-            if (timeClockState.breakSeconds > 600 && dom.overbreakAlert.classList.contains('show') === false) {
-                dom.overbreakAlert.classList.add('show');
-                dom.breakStartTimeAlert.textContent = new Date(timeClockState.breakStartTime).toLocaleTimeString();
-            }
-
-            if (dom.overbreakAlert.classList.contains('show')) {
-                const overbreakSeconds = timeClockState.breakSeconds - 600;
-                dom.overbreakDurationAlert.textContent = formatTime(overbreakSeconds);
-            }
-        }
-
-        function addLogEntry(action, duration = '') {
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-
-            logEntry.innerHTML = `
-                <div class="log-action">${action}</div>
-                <div class="log-time">${timeString}</div>
-            `;
-            dom.activityLog.prepend(logEntry);
-        }
-        
-        // Function to send data to the Google Apps Script web app
-        async function sendDataToSheets(data) {
             try {
-                if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
-                    throw new Error('Please set your Apps Script URL in the code.');
-                }
-                
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Required for Google Apps Script
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
+                    body: formData,
+                    mode: 'no-cors'
                 });
-                
-                // Since the mode is 'no-cors', we can't check the response directly.
-                // We'll just assume it worked unless there was a network error.
-                showNotification('Data sent to Google Sheets!', 'success');
+                console.log('Data submission initiated:', response);
+                showNotification('Data sent to Google Sheet.', 'success');
             } catch (error) {
-                console.error('Error sending data to Sheets:', error);
-                showNotification(`Error: ${error.message}`, 'error');
+                console.error('Error submitting data:', error);
+                showNotification('Failed to send data. Please check your connection.', 'error');
             }
         }
         
-        // Action handlers
-        async function handleClockIn() {
-            const employeeName = dom.employeeNameInput.value.trim();
-            const employeeId = 'EMP-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-
-            if (!employeeName) {
-                showNotification('Please enter your name or ID to Clock In', 'warning');
-                return;
-            }
-
-            timeClockState.isClockedIn = true;
-            timeClockState.currentTask = 'Idle';
-            timeClockState.totalSeconds = 0;
-            dom.employeeNameDisplay.textContent = employeeName;
-            dom.employeeIdDisplay.textContent = `ID: ${employeeId}`;
-            dom.employeeAvatar.textContent = employeeName.split(' ').map(n => n[0]).join('').toUpperCase();
-            
-            updateUI();
-            addLogEntry('Clock In');
-            
+        /**
+         * Updates the current time and date display.
+         */
+        function updateTime() {
             const now = new Date();
-            const data = {
-                employeeName: employeeName,
-                employeeId: employeeId,
-                action: 'Clock In',
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
-            };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            elements.currentTime.textContent = now.toLocaleTimeString('en-US', timeOptions);
+            elements.currentDate.textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+
+        /**
+         * Starts the timer for breaks, lunch, or shifts.
+         * @param {number} [maxDuration=0] - The maximum duration for overbreak alerts.
+         */
+        function startTimer(maxDuration = 0) {
+            if (timeClockState.timerInterval) {
+                clearInterval(timeClockState.timerInterval);
+            }
+            timeClockState.timer = 0;
+            elements.timerDisplay.textContent = '00:00:00';
+            elements.timerDisplay.style.display = 'block';
+            timeClockState.eventStartTime = new Date();
+
+            timeClockState.timerInterval = setInterval(() => {
+                timeClockState.timer++;
+                const hours = String(Math.floor(timeClockState.timer / 3600)).padStart(2, '0');
+                const minutes = String(Math.floor((timeClockState.timer % 3600) / 60)).padStart(2, '0');
+                const seconds = String(timeClockState.timer % 60).padStart(2, '0');
+                elements.timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+
+                if (maxDuration > 0 && timeClockState.timer > maxDuration && !timeClockState.isOverbreak) {
+                    timeClockState.isOverbreak = true;
+                    document.getElementById('overbreakAlert').classList.add('show');
+                    showNotification('You are overbreak. Please clock back in.', 'error');
+                }
+            }, 1000);
+        }
+
+        /**
+         * Stops the timer and calculates the duration.
+         */
+        function stopTimer() {
+            if (timeClockState.timerInterval) {
+                clearInterval(timeClockState.timerInterval);
+                timeClockState.timerInterval = null;
+            }
+            const durationInSeconds = timeClockState.timer;
+            timeClockState.timer = 0;
+            elements.timerDisplay.textContent = '00:00:00';
+            elements.timerDisplay.style.display = 'none';
+            return durationInSeconds;
+        }
+
+        /**
+         * Updates the status badge and state.
+         * @param {string} newStatus - The new status to display.
+         */
+        function updateStatus(newStatus) {
+            timeClockState.status = newStatus;
+            elements.statusBadge.className = `status-badge ${newStatus}`;
+            elements.statusBadge.textContent = newStatus.replace('-', ' ').toUpperCase();
+        }
+
+        /**
+         * Updates the disabled state of buttons based on the current status and break/lunch limits.
+         */
+        function updateButtons() {
+            const employeeFound = elements.employeeIdDisplay.textContent !== '';
             
-            await sendDataToSheets(data);
-        }
-
-        async function handleClockOut() {
-            if (!timeClockState.isClockedIn) return;
-
-            timeClockState.isClockedIn = false;
-            timeClockState.currentTask = 'Idle';
-            const totalHours = formatTime(timeClockState.totalSeconds);
-            clearInterval(timeClockState.totalHoursTimer);
-            timeClockState.totalHoursTimer = null;
-
-            updateUI();
-            addLogEntry(`Clock Out (${totalHours})`);
+            elements.startShiftBtn.disabled = !employeeFound || timeClockState.status !== 'off-shift';
+            elements.endShiftBtn.disabled = !employeeFound || timeClockState.status !== 'working';
             
-            dom.popupMessage.textContent = `Your clock-out has been recorded. You worked for a total of ${totalHours}. Have a great day!`;
-            dom.thankYouPopup.classList.add('show');
+            elements.startBreakBtn.disabled = !employeeFound || timeClockState.status !== 'working' || timeClockState.breaksTaken >= 2 || timeClockState.isSystemIssueActive;
+            elements.endBreakBtn.disabled = !employeeFound || timeClockState.status !== 'on-break' || timeClockState.lastBreakType !== 'break' || timeClockState.isSystemIssueActive;
             
-            const now = new Date();
-            const data = {
-                employeeName: dom.employeeNameDisplay.textContent,
-                employeeId: dom.employeeIdDisplay.textContent,
-                action: 'Clock Out',
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
-                duration: totalHours
-            };
+            elements.startLunchBtn.disabled = !employeeFound || timeClockState.status !== 'working' || timeClockState.lunchTaken >= 1 || timeClockState.isSystemIssueActive;
+            elements.endLunchBtn.disabled = !employeeFound || timeClockState.status !== 'on-break' || timeClockState.lastBreakType !== 'lunch' || timeClockState.isSystemIssueActive;
 
-            await sendDataToSheets(data);
+            elements.systemIssueBtn.disabled = !employeeFound;
         }
 
-        async function handleBreakIn(type) {
-            if (!timeClockState.isClockedIn) {
-                showNotification('Please Clock In first', 'warning');
-                return;
-            }
-            if (timeClockState.currentTask !== 'Idle') {
-                showNotification('Please complete your current task first', 'warning');
-                return;
-            }
+        /**
+         * Displays a temporary notification message.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of notification ('success', 'error', 'info').
+         */
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<span>${message}</span><span class="close-btn">&times;</span>`;
+            elements.notificationContainer.appendChild(notification);
 
-            timeClockState.currentTask = type;
-            if (type === 'Break') {
-                timeClockState.breakStartTime = new Date();
-                timeClockState.breakSeconds = 0;
-            } else if (type === 'Lunch') {
-                timeClockState.lunchStartTime = new Date();
-            } else if (type === 'Bio Break') {
-                timeClockState.bioStartTime = new Date();
-            }
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
 
-            updateUI();
-            addLogEntry(`${type} In`);
-            showNotification(`Enjoy your ${type}!`, 'success');
+            notification.querySelector('.close-btn').addEventListener('click', () => {
+                notification.classList.remove('show');
+                notification.addEventListener('transitionend', () => notification.remove());
+            });
 
-            const now = new Date();
-            const data = {
-                employeeName: dom.employeeNameDisplay.textContent,
-                employeeId: dom.employeeIdDisplay.textContent,
-                action: `${type} In`,
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
-            };
-
-            await sendDataToSheets(data);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.addEventListener('transitionend', () => notification.remove());
+            }, 5000);
         }
-
-        async function handleBreakOut(type) {
-            if (timeClockState.currentTask !== type) {
-                showNotification(`You are not currently on ${type}.`, 'warning');
-                return;
-            }
-
-            timeClockState.currentTask = 'Idle';
-            let duration = '';
-            if (type === 'Break') {
-                timeClockState.breakStartTime = null;
-                duration = formatTime(timeClockState.breakSeconds);
-                timeClockState.breakSeconds = 0;
-                dom.breakTimerDisplay.textContent = '00:00:00';
-            } else if (type === 'Lunch') {
-                timeClockState.lunchStartTime = null;
-            } else if (type === 'Bio Break') {
-                timeClockState.bioStartTime = null;
-            }
-
-            updateUI();
-            addLogEntry(`${type} Out (${duration})`);
-            showNotification(`Welcome back from your ${type}!`, 'success');
-
-            const now = new Date();
-            const data = {
-                employeeName: dom.employeeNameDisplay.textContent,
-                employeeId: dom.employeeIdDisplay.textContent,
-                action: `${type} Out`,
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
-                duration: duration
-            };
-            
-            await sendDataToSheets(data);
-        }
-
-        function handleSystemIssue() {
-            if (timeClockState.systemIssueStartTime) {
-                // End system issue
-                timeClockState.systemIssueStartTime = null;
-                dom.systemIssueButton.classList.remove('system-issue-active');
-                dom.systemIssueButton.innerHTML = `<i class="fas fa-exclamation-triangle"></i> System Issue`;
-                
-                clearInterval(timeClockState.systemIssueTimer);
-                timeClockState.systemIssueTimer = null;
-                
-                const duration = formatTime(timeClockState.systemIssueSeconds);
-                timeClockState.systemIssueSeconds = 0;
-                dom.systemIssueDisplay.style.display = 'none';
-
-                addLogEntry(`System Issue Resolved (${duration})`);
-                showNotification('System issue resolved. Time clock active.', 'success');
-                
-                // Re-enable all buttons
-                dom.clockInButton.disabled = false;
-                dom.clockOutButton.disabled = !timeClockState.isClockedIn;
-                dom.breakInButton.disabled = false;
-                dom.breakOutButton.disabled = true;
-                dom.lunchInButton.disabled = false;
-                dom.lunchOutButton.disabled = true;
-                dom.bioInButton.disabled = false;
-                dom.bioOutButton.disabled = true;
-            } else {
-                // Start system issue
-                timeClockState.systemIssueStartTime = new Date();
-                timeClockState.systemIssueSeconds = 0;
-                dom.systemIssueButton.classList.add('system-issue-active');
-                dom.systemIssueButton.innerHTML = `<i class="fas fa-check-circle"></i> Resolve Issue`;
-                
-                // Display system issue panel
-                dom.systemIssueDisplay.style.display = 'block';
-                dom.systemIssueStartTime.textContent = `Start Time: ${timeClockState.systemIssueStartTime.toLocaleTimeString()}`;
-
-                // Disable all other buttons
-                const allButtons = document.querySelectorAll('.clock-button');
-                allButtons.forEach(button => {
-                    if (button.id !== 'systemIssueButton') {
-                        button.disabled = true;
-                    }
-                });
-
-                timeClockState.systemIssueTimer = setInterval(() => {
-                    timeClockState.systemIssueSeconds++;
-                    dom.systemIssueDuration.textContent = formatTime(timeClockState.systemIssueSeconds);
-                }, 1000);
-
-                addLogEntry('System Issue Reported');
-                showNotification('System issue reported. All other functions are disabled.', 'warning');
-            }
-        }
-
-        // Reset function
-        function handleReset() {
-            // Stop all timers
-            clearInterval(timeClockState.totalHoursTimer);
-            clearInterval(timeClockState.breakTimer);
-            clearInterval(timeClockState.systemIssueTimer);
-
-            // Reset all state variables
-            timeClockState.isClockedIn = false;
-            timeClockState.currentTask = 'Idle';
-            timeClockState.breakStartTime = null;
-            timeClockState.lunchStartTime = null;
-            timeClockState.bioStartTime = null;
-            timeClockState.systemIssueStartTime = null;
-            timeClockState.totalHoursTimer = null;
-            timeClockState.breakTimer = null;
-            timeClockState.systemIssueTimer = null;
-            timeClockState.totalSeconds = 0;
-            timeClockState.breakSeconds = 0;
-            timeClockState.systemIssueSeconds = 0;
-
-            // Reset UI
-            dom.employeeNameInput.value = '';
-            dom.employeeNameDisplay.textContent = 'John Doe';
-            dom.employeeIdDisplay.textContent = 'ID: EMP-001';
-            dom.employeeAvatar.textContent = 'JD';
-            dom.clockStatus.textContent = 'Offline';
-            dom.totalHoursDisplay.textContent = '00:00:00';
-            dom.currentTaskDisplay.textContent = 'Idle';
-            dom.breakTimerDisplay.textContent = '00:00:00';
-            dom.activityLog.innerHTML = '<h3>Activity Log</h3>';
-            
-            dom.systemIssueDisplay.style.display = 'none';
-            dom.systemIssueButton.classList.remove('system-issue-active');
-            dom.systemIssueButton.innerHTML = `<i class="fas fa-exclamation-triangle"></i> System Issue`;
-
-            updateUI();
-            showNotification('All buttons and states have been reset', 'success');
-        }
-
-        // Event listeners
-        dom.clockInButton.addEventListener('click', handleClockIn);
-        dom.clockOutButton.addEventListener('click', handleClockOut);
-        dom.breakInButton.addEventListener('click', () => handleBreakIn('Break'));
-        dom.breakOutButton.addEventListener('click', () => handleBreakOut('Break'));
-        dom.lunchInButton.addEventListener('click', () => handleBreakIn('Lunch'));
-        dom.lunchOutButton.addEventListener('click', () => handleBreakOut('Lunch'));
-        dom.bioInButton.addEventListener('click', () => handleBreakIn('Bio Break'));
-        dom.bioOutButton.addEventListener('click', () => handleBreakOut('Bio Break'));
-        dom.systemIssueButton.addEventListener('click', handleSystemIssue);
-        dom.resetButton.addEventListener('click', handleReset);
-
-        // Initial setup
-        setInterval(updateTime, 1000);
-        timeClockState.totalHoursTimer = setInterval(updateTimers, 1000);
-        updateTime();
-        updateUI();
-        createParticles(); // Particle animation
-
+        
         function closeThankYouPopup() {
-            dom.thankYouPopup.classList.remove('show');
-        }
-
-        function closeOverbreakAlert() {
-            dom.overbreakAlert.classList.remove('show');
+            elements.thankYouPopup.classList.remove('show');
         }
         
-        // Add this at the end to create floating particles
+        function closeOverbreakAlert() {
+            elements.overbreakAlert.classList.remove('show');
+        }
+        
+        elements.employeeNameInput.addEventListener('input', () => {
+            const firstNameInput = elements.employeeNameInput.value.trim().toLowerCase();
+            let matchedName = null;
+            let matchedId = null;
+            
+            for (const fullName in employeeDatabase) {
+                const dbFirstName = fullName.split(' ')[0].toLowerCase();
+                if (firstNameInput === dbFirstName && firstNameInput !== '') {
+                    matchedName = fullName;
+                    matchedId = employeeDatabase[fullName];
+                    break;
+                }
+            }
+
+            if (matchedId) {
+                elements.employeeNameDisplay.textContent = matchedName;
+                elements.employeeIdDisplay.textContent = matchedId;
+                showNotification(`Welcome, ${matchedName}!`, 'success');
+            } else {
+                elements.employeeNameDisplay.textContent = 'Not Found';
+                elements.employeeIdDisplay.textContent = '';
+            }
+            updateButtons();
+        });
+
+        elements.startShiftBtn.addEventListener('click', () => {
+            updateStatus('working');
+            updateButtons();
+            startTimer();
+            submitDataToGoogleSheet('Start Shift', 0);
+            showNotification('Shift started successfully', 'success');
+        });
+
+        elements.endShiftBtn.addEventListener('click', () => {
+            updateStatus('off-shift');
+            updateButtons();
+            const duration = stopTimer();
+            submitDataToGoogleSheet('End Shift', duration);
+            elements.thankYouPopup.classList.add('show');
+            showNotification('Shift ended successfully', 'success');
+        });
+
+        elements.startBreakBtn.addEventListener('click', () => {
+            updateStatus('on-break');
+            timeClockState.breaksTaken++;
+            timeClockState.lastBreakType = 'break';
+            updateButtons();
+            startTimer(maxBreakTime);
+            submitDataToGoogleSheet('Start Break', 0);
+            showNotification('Break started', 'info');
+        });
+
+        elements.endBreakBtn.addEventListener('click', () => {
+            updateStatus('working');
+            updateButtons();
+            const duration = stopTimer();
+            elements.overbreakAlert.classList.remove('show');
+            timeClockState.isOverbreak = false;
+            timeClockState.lastBreakType = null;
+            submitDataToGoogleSheet('End Break', duration);
+            showNotification('Break ended. Back to work!', 'success');
+        });
+        
+        elements.startLunchBtn.addEventListener('click', () => {
+            updateStatus('on-break');
+            timeClockState.lunchTaken++;
+            timeClockState.lastBreakType = 'lunch';
+            updateButtons();
+            startTimer(maxLunchTime);
+            submitDataToGoogleSheet('Start Lunch', 0);
+            showNotification('Lunch started', 'info');
+        });
+
+        elements.endLunchBtn.addEventListener('click', () => {
+            updateStatus('working');
+            updateButtons();
+            const duration = stopTimer();
+            elements.overbreakAlert.classList.remove('show');
+            timeClockState.isOverbreak = false;
+            timeClockState.lastBreakType = null;
+            submitDataToGoogleSheet('End Lunch', duration);
+            showNotification('Lunch ended. Back to work!', 'success');
+        });
+
+        elements.systemIssueBtn.addEventListener('click', () => {
+            if (!timeClockState.isSystemIssueActive) {
+                elements.systemIssueDisplay.style.display = 'block';
+                timeClockState.isSystemIssueActive = true;
+                submitDataToGoogleSheet('System Issue Reported', 0, 'User reported a system issue.');
+                showNotification('System issue reported. Please contact support.', 'error');
+            } else {
+                elements.systemIssueDisplay.style.display = 'none';
+                timeClockState.isSystemIssueActive = false;
+                showNotification('System issue dismissed.', 'success');
+            }
+            updateButtons();
+        });
+        
+        elements.resetStateBtn.addEventListener('click', () => {
+            updateStatus('off-shift');
+            
+            elements.employeeNameInput.value = '';
+            elements.employeeNameDisplay.textContent = '';
+            elements.employeeIdDisplay.textContent = '';
+            
+            timeClockState.breaksTaken = 0;
+            timeClockState.lunchTaken = 0;
+            timeClockState.lastBreakType = null;
+
+            updateButtons();
+            stopTimer();
+
+            elements.thankYouPopup.classList.remove('show');
+            elements.overbreakAlert.classList.remove('show');
+            
+            timeClockState.isOverbreak = false;
+            timeClockState.isSystemIssueActive = false;
+            
+            elements.systemIssueDisplay.style.display = 'none';
+
+            showNotification('All buttons and states have been reset', 'success');
+        });
+        
         function createParticles() {
             const container = document.getElementById('particlesContainer');
             const particleCount = 50;
-
+            
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
-
-                // Random position
+                
                 particle.style.left = `${Math.random() * 100}%`;
                 particle.style.top = `${Math.random() * 100}%`;
-
-                // Random size
+                
                 const size = Math.random() * 5 + 2;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
-
-                // Random animation delay
-                particle.style.animationDelay = `${Math.random() * 15}s`;
-
+                
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                
                 container.appendChild(particle);
             }
         }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        updateButtons();
+        createParticles();
+        
+        window.closeThankYouPopup = closeThankYouPopup;
+        window.closeOverbreakAlert = closeOverbreakAlert;
     </script>
 </body>
 </html>
