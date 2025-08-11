@@ -346,14 +346,23 @@
             color: #333;
         }
         
+        #overbreakAlert .popup-content {
+            background-color: #FF0000;
+            color: #FFFFFF;
+        }
+        
         #issueDescribePopup .popup-content {
             background-color: #FF637E;
             color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
 
         #issueSuccessPopup .popup-content {
             background-color: #90A1B9;
-            color: #171717;
+            color: #FFFFFF;
         }
         
         #thankYouPopup h2, #thankYouPopup p {
@@ -394,8 +403,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             padding: 10px;
-            margin-bottom: 20px;
-            color: #2B7FFF;
+            color: #FFFFFF;
             font-size: 1rem;
         }
 
@@ -514,7 +522,7 @@
         <div class="popup-content">
             <span class="close-btn" onclick="closeThankYouPopup()">&times;</span>
             <h2>Thank You!</h2>
-            <p>Your shift has successfully ended.</p>
+            <p>Your shift has been successfully ended.</p>
             <p>Have a wonderful day!</p>
         </div>
     </div>
@@ -546,8 +554,8 @@
     <div id="issueSuccessPopup" class="popup-overlay">
         <div class="popup-content">
             <span class="close-btn" onclick="closeIssueSuccessPopup()">&times;</span>
-            <h2 style="color: #EFF6FF;">Thank you.</h2>
-            <p style="color: #EFF6FF;">We will be reporting this to the support team.</p>
+            <h2>Thank you.</h2>
+            <p>We will be reporting this to the support team.</p>
         </div>
     </div>
 
