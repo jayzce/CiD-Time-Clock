@@ -347,8 +347,13 @@
         }
         
         #issueDescribePopup .popup-content {
-            background: #FC1E91;
-            color: #fff;
+            background-color: #FF637E;
+            color: white;
+        }
+
+        #issueSuccessPopup .popup-content {
+            background-color: #90A1B9;
+            color: #171717;
         }
         
         #thankYouPopup h2, #thankYouPopup p {
@@ -390,7 +395,7 @@
             border-radius: 10px;
             padding: 10px;
             margin-bottom: 20px;
-            color: white;
+            color: #2B7FFF;
             font-size: 1rem;
         }
 
@@ -462,10 +467,6 @@
             </div>
             <div class="status-badge" id="statusBadge">Off Shift</div>
             <div id="timerDisplay" class="status-badge" style="display: none;">00:00:00</div>
-            <div id="systemIssueDisplay" class="system-issue-display" style="display: none;">
-                <h3>System Issue Detected</h3>
-                <p>Please contact support for assistance.</p>
-            </div>
         </div>
 
         <div class="control-panel">
@@ -508,20 +509,45 @@
         </div>
     </div>
     
+    <!-- Existing Thank You Popup -->
     <div id="thankYouPopup" class="popup-overlay">
         <div class="popup-content">
             <span class="close-btn" onclick="closeThankYouPopup()">&times;</span>
             <h2>Thank You!</h2>
-            <p>Your shift has been successfully ended.</p>
+            <p>Your shift has successfully ended.</p>
             <p>Have a wonderful day!</p>
         </div>
     </div>
 
+    <!-- Existing Overbreak Alert Popup -->
     <div id="overbreakAlert" class="popup-overlay">
         <div class="popup-content">
             <span class="close-btn" onclick="closeOverbreakAlert()">&times;</span>
             <h2>Overbreak Alert!</h2>
             <p>You are overbreak. Please clock back in.</p>
+        </div>
+    </div>
+
+    <!-- New System Issue Description Popup -->
+    <div id="issueDescribePopup" class="popup-overlay">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeIssueDescribePopup()">&times;</span>
+            <h2>Report an Issue</h2>
+            <p>Please provide the details of the issue.</p>
+            <textarea id="issueDescriptionTextarea" placeholder="Describe the problem..."></textarea>
+            <button class="btn btn-submit-issue" onclick="submitIssue()">
+                <i class="fa-solid fa-paper-plane"></i>
+                Submit
+            </button>
+        </div>
+    </div>
+
+    <!-- New System Issue Success Popup -->
+    <div id="issueSuccessPopup" class="popup-overlay">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeIssueSuccessPopup()">&times;</span>
+            <h2 style="color: #EFF6FF;">Thank you.</h2>
+            <p style="color: #EFF6FF;">We will be reporting this to the support team.</p>
         </div>
     </div>
 
@@ -542,10 +568,12 @@
             endLunchBtn: document.getElementById('endLunchBtn'),
             resetStateBtn: document.getElementById('resetStateBtn'),
             systemIssueBtn: document.getElementById('systemIssueBtn'),
-            systemIssueDisplay: document.getElementById('systemIssueDisplay'),
             notificationContainer: document.getElementById('notificationContainer'),
             thankYouPopup: document.getElementById('thankYouPopup'),
             overbreakAlert: document.getElementById('overbreakAlert'),
+            issueDescribePopup: document.getElementById('issueDescribePopup'),
+            issueSuccessPopup: document.getElementById('issueSuccessPopup'),
+            issueDescriptionTextarea: document.getElementById('issueDescriptionTextarea'),
             employeeNameInput: document.getElementById('employeeNameInput'),
             employeeNameDisplay: document.getElementById('employeeName'),
             employeeIdDisplay: document.getElementById('employeeId'),
@@ -562,7 +590,6 @@
             lunchTaken: 0,
             eventStartTime: null,
             lastBreakType: null,
-            isSystemIssueActive: false,
         };
 
         // Time limits in seconds
@@ -698,11 +725,11 @@
             elements.startShiftBtn.disabled = !employeeFound || timeClockState.status !== 'off-shift';
             elements.endShiftBtn.disabled = !employeeFound || timeClockState.status !== 'working';
             
-            elements.startBreakBtn.disabled = !employeeFound || timeClockState.status !== 'working' || timeClockState.breaksTaken >= 2 || timeClockState.isSystemIssueActive;
-            elements.endBreakBtn.disabled = !employeeFound || timeClockState.status !== 'on-break' || timeClockState.lastBreakType !== 'break' || timeClockState.isSystemIssueActive;
+            elements.startBreakBtn.disabled = !employeeFound || timeClockState.status !== 'working' || timeClockState.breaksTaken >= 2;
+            elements.endBreakBtn.disabled = !employeeFound || timeClockState.status !== 'on-break' || timeClockState.lastBreakType !== 'break';
             
-            elements.startLunchBtn.disabled = !employeeFound || timeClockState.status !== 'working' || timeClockState.lunchTaken >= 1 || timeClockState.isSystemIssueActive;
-            elements.endLunchBtn.disabled = !employeeFound || timeClockState.status !== 'on-break' || timeClockState.lastBreakType !== 'lunch' || timeClockState.isSystemIssueActive;
+            elements.startLunchBtn.disabled = !employeeFound || timeClockState.status !== 'working' || timeClockState.lunchTaken >= 1;
+            elements.endLunchBtn.disabled = !employeeFound || timeClockState.status !== 'on-break' || timeClockState.lastBreakType !== 'lunch';
 
             elements.systemIssueBtn.disabled = !employeeFound;
         }
@@ -739,6 +766,27 @@
         
         function closeOverbreakAlert() {
             elements.overbreakAlert.classList.remove('show');
+        }
+
+        function closeIssueDescribePopup() {
+            elements.issueDescribePopup.classList.remove('show');
+            elements.issueDescriptionTextarea.value = '';
+        }
+
+        function closeIssueSuccessPopup() {
+            elements.issueSuccessPopup.classList.remove('show');
+        }
+
+        function submitIssue() {
+            const issueDescription = elements.issueDescriptionTextarea.value.trim();
+            if (issueDescription === '') {
+                showNotification('Please provide a description of the issue.', 'error');
+                return;
+            }
+            
+            closeIssueDescribePopup();
+            submitDataToGoogleSheet('System Issue Reported', 0, issueDescription);
+            elements.issueSuccessPopup.classList.add('show');
         }
         
         elements.employeeNameInput.addEventListener('input', () => {
@@ -826,17 +874,7 @@
         });
 
         elements.systemIssueBtn.addEventListener('click', () => {
-            if (!timeClockState.isSystemIssueActive) {
-                elements.systemIssueDisplay.style.display = 'block';
-                timeClockState.isSystemIssueActive = true;
-                submitDataToGoogleSheet('System Issue Reported', 0, 'User reported a system issue.');
-                showNotification('System issue reported. Please contact support.', 'error');
-            } else {
-                elements.systemIssueDisplay.style.display = 'none';
-                timeClockState.isSystemIssueActive = false;
-                showNotification('System issue dismissed.', 'success');
-            }
-            updateButtons();
+            elements.issueDescribePopup.classList.add('show');
         });
         
         elements.resetStateBtn.addEventListener('click', () => {
@@ -853,13 +891,12 @@
             updateButtons();
             stopTimer();
 
-            elements.thankYouPopup.classList.remove('show');
-            elements.overbreakAlert.classList.remove('show');
+            closeThankYouPopup();
+            closeOverbreakAlert();
+            closeIssueDescribePopup();
+            closeIssueSuccessPopup();
             
             timeClockState.isOverbreak = false;
-            timeClockState.isSystemIssueActive = false;
-            
-            elements.systemIssueDisplay.style.display = 'none';
 
             showNotification('All buttons and states have been reset', 'success');
         });
@@ -892,7 +929,9 @@
         
         window.closeThankYouPopup = closeThankYouPopup;
         window.closeOverbreakAlert = closeOverbreakAlert;
+        window.closeIssueDescribePopup = closeIssueDescribePopup;
+        window.closeIssueSuccessPopup = closeIssueSuccessPopup;
+        window.submitIssue = submitIssue;
     </script>
 </body>
 </html>
-
