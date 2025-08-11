@@ -532,7 +532,7 @@
         <div class="popup-content">
             <span class="close-btn" onclick="closeOverbreakAlert()">&times;</span>
             <h2>Overbreak Alert!</h2>
-            <p>Your break is over. Please clock back in.</p>
+            <p>You are overbreak. Please clock back in.</p>
         </div>
     </div>
 
@@ -682,10 +682,13 @@
             timeClockState.timer = 0;
             elements.timerDisplay.textContent = '00:00:00';
             elements.timerDisplay.style.display = 'block';
-            timeClockState.eventStartTime = new Date();
+            timeClockState.eventStartTime = Date.now(); // Store start timestamp
 
             timeClockState.timerInterval = setInterval(() => {
-                timeClockState.timer++;
+                // Calculate elapsed time based on the timestamp, not a counter
+                const elapsed = Math.floor((Date.now() - timeClockState.eventStartTime) / 1000);
+                timeClockState.timer = elapsed; // Update the timer state
+                
                 const hours = String(Math.floor(timeClockState.timer / 3600)).padStart(2, '0');
                 const minutes = String(Math.floor((timeClockState.timer % 3600) / 60)).padStart(2, '0');
                 const seconds = String(timeClockState.timer % 60).padStart(2, '0');
@@ -707,7 +710,8 @@
                 clearInterval(timeClockState.timerInterval);
                 timeClockState.timerInterval = null;
             }
-            const durationInSeconds = timeClockState.timer;
+            // Calculate final duration from the timestamp
+            const durationInSeconds = Math.floor((Date.now() - timeClockState.eventStartTime) / 1000);
             timeClockState.timer = 0;
             elements.timerDisplay.textContent = '00:00:00';
             elements.timerDisplay.style.display = 'none';
